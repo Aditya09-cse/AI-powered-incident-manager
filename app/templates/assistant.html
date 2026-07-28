@@ -1,0 +1,466 @@
+{% extends "base.html" %}
+
+{% block title %}
+AI Assistant • IncidentAI
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-heading">
+
+    <div>
+
+        <div class="heading-label">
+            <span class="sparkle">✦</span>
+            OLLAMA POWERED
+        </div>
+
+        <h1>DevOps AI Assistant</h1>
+
+        <p>
+            Your local AI copilot for infrastructure,
+            deployments and incident troubleshooting.
+        </p>
+
+    </div>
+
+
+    <div class="ai-status-pill">
+
+        <span class="live-dot"></span>
+
+        Ollama Connected
+
+    </div>
+
+</div>
+
+
+<div class="ai-workspace">
+
+    <section class="chat-container">
+
+        <div
+            class="chat-header"
+        >
+
+            <div>
+
+                <div class="chat-title">
+                    <div class="mini-ai-logo">
+                        ✦
+                    </div>
+
+                    <div>
+                        <strong>IncidentAI</strong>
+                        <span>DevOps & SRE Assistant</span>
+                    </div>
+                </div>
+
+            </div>
+
+
+            {% if chats %}
+
+            <form
+                method="POST"
+                action="{{ url_for('clear_chat') }}"
+            >
+
+                <button
+                    class="ghost-button"
+                    type="submit"
+                >
+                    Clear conversation
+                </button>
+
+            </form>
+
+            {% endif %}
+
+        </div>
+
+
+        <div
+            class="chat-messages"
+            id="chatMessages"
+        >
+
+            {% if not chats %}
+
+            <div class="welcome-state">
+
+                <div class="welcome-logo">
+                    ✦
+                </div>
+
+                <div class="welcome-badge">
+                    LOCAL DEVOPS AI
+                </div>
+
+                <h2>
+                    What are we debugging?
+                </h2>
+
+                <p>
+                    Paste an error, describe an incident,
+                    or ask me how to troubleshoot your
+                    infrastructure.
+                </p>
+
+
+                <div class="prompt-grid">
+
+                    <button
+                        type="button"
+                        class="prompt-card"
+                        data-prompt="My Kubernetes pod is in CrashLoopBackOff. Help me troubleshoot it step by step."
+                    >
+
+                        <span class="prompt-icon">
+                            K8s
+                        </span>
+
+                        <span>
+
+                            <strong>
+                                CrashLoopBackOff
+                            </strong>
+
+                            <small>
+                                Debug Kubernetes pod failures
+                            </small>
+
+                        </span>
+
+                        <span class="prompt-arrow">
+                            →
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="prompt-card"
+                        data-prompt="Port 5000 is already allocated. Help me identify the process and resolve the conflict."
+                    >
+
+                        <span class="prompt-icon">
+                            :5000
+                        </span>
+
+                        <span>
+
+                            <strong>
+                                Port conflict
+                            </strong>
+
+                            <small>
+                                Find what's using a port
+                            </small>
+
+                        </span>
+
+                        <span class="prompt-arrow">
+                            →
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="prompt-card"
+                        data-prompt="My Docker container exits with code 137. Explain what it means and how to troubleshoot it."
+                    >
+
+                        <span class="prompt-icon">
+                            DK
+                        </span>
+
+                        <span>
+
+                            <strong>
+                                Docker exit 137
+                            </strong>
+
+                            <small>
+                                Diagnose container termination
+                            </small>
+
+                        </span>
+
+                        <span class="prompt-arrow">
+                            →
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="prompt-card"
+                        data-prompt="My EC2 application is not reachable from the internet. Give me a troubleshooting checklist."
+                    >
+
+                        <span class="prompt-icon">
+                            AWS
+                        </span>
+
+                        <span>
+
+                            <strong>
+                                EC2 unreachable
+                            </strong>
+
+                            <small>
+                                Debug AWS connectivity
+                            </small>
+
+                        </span>
+
+                        <span class="prompt-arrow">
+                            →
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            {% for chat in chats %}
+
+            <div class="chat-message user">
+
+                <div class="message-avatar user-avatar">
+                    U
+                </div>
+
+                <div class="message-wrapper">
+
+                    <div class="message-info">
+                        You
+                    </div>
+
+                    <div class="message-bubble">
+                        {{ chat.user_message }}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="chat-message assistant">
+
+                <div class="message-avatar ai-avatar">
+                    ✦
+                </div>
+
+                <div class="message-wrapper">
+
+                    <div class="message-info">
+
+                        IncidentAI
+
+                        <span>
+                            llama3.2:3b
+                        </span>
+
+                    </div>
+
+                    <pre class="message-bubble ai-response">{{ chat.ai_response }}</pre>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        {% if error %}
+
+        <div class="ai-error">
+
+            <strong>
+                Unable to reach Ollama
+            </strong>
+
+            <span>
+                {{ error }}
+            </span>
+
+        </div>
+
+        {% endif %}
+
+
+        <div class="composer-wrapper">
+
+            <form
+                method="POST"
+                class="chat-composer"
+                id="chatForm"
+            >
+
+                <textarea
+                    name="message"
+                    id="assistantInput"
+                    placeholder="Ask IncidentAI anything..."
+                    autocomplete="off"
+                    required
+                ></textarea>
+
+
+                <div class="composer-footer">
+
+                    <div class="composer-hint">
+                        Paste logs, errors or describe your issue
+                    </div>
+
+                    <button
+                        class="send-button"
+                        type="submit"
+                        data-loading="Thinking..."
+                    >
+                        <span>Send</span>
+                        <span>↑</span>
+                    </button>
+
+                </div>
+
+            </form>
+
+            <div class="ai-disclaimer">
+                ✦ Running locally with Ollama • AI responses may require verification
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <aside class="ai-sidebar">
+
+        <div class="info-card">
+
+            <div class="info-card-heading">
+
+                <div class="info-icon">
+                    ✦
+                </div>
+
+                <div>
+                    <strong>AI Runtime</strong>
+                    <span>Local inference</span>
+                </div>
+
+            </div>
+
+
+            <div class="runtime-list">
+
+                <div>
+                    <span>Provider</span>
+                    <strong>Ollama</strong>
+                </div>
+
+                <div>
+                    <span>Model</span>
+                    <strong>llama3.2:3b</strong>
+                </div>
+
+                <div>
+                    <span>Endpoint</span>
+                    <strong>localhost:11434</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="info-card">
+
+            <span class="card-label">
+                CAPABILITIES
+            </span>
+
+            <h3>
+                I can help with
+            </h3>
+
+
+            <div class="capability-list">
+
+                <div>
+                    <span>⌘</span>
+                    Linux
+                </div>
+
+                <div>
+                    <span>◈</span>
+                    Docker
+                </div>
+
+                <div>
+                    <span>⬡</span>
+                    Kubernetes
+                </div>
+
+                <div>
+                    <span>☁</span>
+                    AWS
+                </div>
+
+                <div>
+                    <span>↯</span>
+                    CI/CD
+                </div>
+
+                <div>
+                    <span>◆</span>
+                    Terraform
+                </div>
+
+                <div>
+                    <span>◎</span>
+                    Networking
+                </div>
+
+                <div>
+                    <span>▱</span>
+                    PostgreSQL
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="tip-card">
+
+            <span>
+                PRO TIP
+            </span>
+
+            <p>
+                Include the exact error, logs and what changed
+                before the incident for better analysis.
+            </p>
+
+        </div>
+
+    </aside>
+
+</div>
+
+{% endblock %}

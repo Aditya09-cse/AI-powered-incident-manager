@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block title %}
+Incidents | IncidentAI
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <p class="eyebrow">
+            INCIDENT MANAGEMENT
+        </p>
+
+        <h1>Incidents</h1>
+
+        <p class="subtitle">
+            Create, investigate and track operational issues.
+        </p>
+
+    </div>
+
+</div>
+
+
+<section
+    class="panel"
+    id="create"
+>
+
+    <div class="panel-header">
+
+        <div>
+            <h2>Create Incident</h2>
+
+            <p>
+                Record a new infrastructure or application issue.
+            </p>
+        </div>
+
+    </div>
+
+
+    <form
+        action="{{ url_for('create_incident') }}"
+        method="POST"
+        class="incident-form"
+    >
+
+        <div class="form-group full">
+
+            <label>
+                Incident title
+            </label>
+
+            <input
+                type="text"
+                name="title"
+                placeholder="e.g. Kubernetes pod entering CrashLoopBackOff"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-group full">
+
+            <label>
+                Description
+            </label>
+
+            <textarea
+                name="description"
+                placeholder="Describe the error, symptoms, recent changes and anything you've already tried..."
+                required
+            ></textarea>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Category
+            </label>
+
+            <select name="category">
+
+                <option>Linux</option>
+                <option>Docker</option>
+                <option>Kubernetes</option>
+                <option>AWS</option>
+                <option>CI/CD</option>
+                <option>Terraform</option>
+                <option>Database</option>
+                <option>Networking</option>
+                <option>Application</option>
+                <option>Other</option>
+
+            </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Severity
+            </label>
+
+            <select name="severity">
+
+                <option>Low</option>
+
+                <option selected>
+                    Medium
+                </option>
+
+                <option>High</option>
+                <option>Critical</option>
+
+            </select>
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <button
+                type="submit"
+                class="button"
+            >
+                Create Incident
+            </button>
+
+        </div>
+
+    </form>
+
+</section>
+
+
+<section class="panel">
+
+    <div class="panel-header">
+
+        <div>
+            <h2>All Incidents</h2>
+
+            <p>
+                Search and filter your incident records.
+            </p>
+        </div>
+
+    </div>
+
+
+    <form
+        method="GET"
+        class="filters"
+    >
+
+        <input
+            type="search"
+            name="search"
+            value="{{ search }}"
+            placeholder="Search incidents..."
+        >
+
+
+        <select name="status">
+
+            {% for value in [
+                "All",
+                "Open",
+                "Investigating",
+                "Resolved"
+            ] %}
+
+                <option
+                    value="{{ value }}"
+                    {% if status_filter == value %}selected{% endif %}
+                >
+                    {{ value }}
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <select name="severity">
+
+            {% for value in [
+                "All",
+                "Low",
+                "Medium",
+                "High",
+                "Critical"
+            ] %}
+
+                <option
+                    value="{{ value }}"
+                    {% if severity_filter == value %}selected{% endif %}
+                >
+                    {{ value }}
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <button
+            class="button secondary"
+            type="submit"
+        >
+            Filter
+        </button>
+
+    </form>
+
+
+    {% if incidents %}
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Incident</th>
+                    <th>Category</th>
+                    <th>Severity</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for incident in incidents %}
+
+                <tr>
+
+                    <td>
+                        INC-{{ "%04d"|format(incident.id) }}
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="incident-link"
+                            href="{{ url_for('incident_detail', incident_id=incident.id) }}"
+                        >
+                            {{ incident.title }}
+                        </a>
+
+                        <div class="table-description">
+                            {{ incident.description|truncate(80) }}
+                        </div>
+
+                    </td>
+
+                    <td>
+                        {{ incident.category }}
+                    </td>
+
+                    <td>
+                        <span class="badge severity-{{ incident.severity|lower }}">
+                            {{ incident.severity }}
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="badge status-{{ incident.status|lower }}">
+                            {{ incident.status }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ incident.created_at.strftime("%d %b %Y") }}
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+        <div class="empty-state">
+
+            <h3>No incidents found</h3>
+
+            <p>
+                Create an incident or change your filters.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

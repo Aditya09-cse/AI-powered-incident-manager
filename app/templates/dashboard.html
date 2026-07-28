@@ -1,0 +1,752 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard • IncidentAI{% endblock %}
+
+{% block content %}
+
+<div class="dashboard">
+
+    <!-- =========================
+         DASHBOARD HEADER
+    ========================== -->
+
+    <section class="dashboard-hero">
+
+        <div>
+            <div class="dashboard-eyebrow">
+                OPERATIONS OVERVIEW
+            </div>
+
+            <h1>Operations Dashboard</h1>
+
+            <p>
+                Monitor, manage and resolve your DevOps incidents efficiently.
+            </p>
+        </div>
+
+        <a
+            href="{{ url_for('incidents') }}"
+            class="primary-action"
+        >
+            <span class="action-plus">＋</span>
+            New Incident
+        </a>
+
+    </section>
+
+
+    <!-- =========================
+         KPI CARDS
+    ========================== -->
+
+    <section class="metrics-grid">
+
+        <!-- Total -->
+
+        <article class="metric-card">
+
+            <div class="metric-icon metric-blue">
+                ▦
+            </div>
+
+            <div class="metric-content">
+
+                <span class="metric-label">
+                    Total Incidents
+                </span>
+
+                <strong class="metric-value">
+                    {{ stats.total or 0 }}
+                </strong>
+
+                <span class="metric-meta">
+                    All time
+                </span>
+
+            </div>
+
+        </article>
+
+
+        <!-- Open -->
+
+        <article class="metric-card">
+
+            <div class="metric-icon metric-green">
+                ϟ
+            </div>
+
+            <div class="metric-content">
+
+                <span class="metric-label">
+                    Open
+                </span>
+
+                <strong class="metric-value">
+                    {{ stats.open or 0 }}
+                </strong>
+
+                <span class="metric-meta">
+
+                    {% if stats.total %}
+                        {{ ((stats.open / stats.total) * 100) | round | int }}% of total
+                    {% else %}
+                        0% of total
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+        </article>
+
+
+        <!-- Investigating -->
+
+        <article class="metric-card">
+
+            <div class="metric-icon metric-orange">
+                ⌕
+            </div>
+
+            <div class="metric-content">
+
+                <span class="metric-label">
+                    Investigating
+                </span>
+
+                <strong class="metric-value">
+                    {{ stats.investigating or 0 }}
+                </strong>
+
+                <span class="metric-meta">
+
+                    {% if stats.total %}
+                        {{ ((stats.investigating / stats.total) * 100) | round | int }}% of total
+                    {% else %}
+                        0% of total
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+        </article>
+
+
+        <!-- Resolved -->
+
+        <article class="metric-card">
+
+            <div class="metric-icon metric-purple">
+                ✓
+            </div>
+
+            <div class="metric-content">
+
+                <span class="metric-label">
+                    Resolved
+                </span>
+
+                <strong class="metric-value">
+                    {{ stats.resolved or 0 }}
+                </strong>
+
+                <span class="metric-meta">
+
+                    {% if stats.total %}
+                        {{ ((stats.resolved / stats.total) * 100) | round | int }}% of total
+                    {% else %}
+                        0% of total
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+        </article>
+
+
+        <!-- Critical -->
+
+        <article class="metric-card">
+
+            <div class="metric-icon metric-red">
+                !
+            </div>
+
+            <div class="metric-content">
+
+                <span class="metric-label">
+                    Critical
+                </span>
+
+                <strong class="metric-value">
+                    {{ stats.critical or 0 }}
+                </strong>
+
+                <span class="metric-meta">
+                    Active incidents
+                </span>
+
+            </div>
+
+        </article>
+
+    </section>
+
+
+    <!-- =========================
+         DASHBOARD MAIN GRID
+    ========================== -->
+
+    <section class="dashboard-main-grid">
+
+        <!-- LEFT SIDE -->
+
+        <div class="dashboard-main-column">
+
+
+            <!-- INCIDENT TREND -->
+
+            <article class="dashboard-card trend-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h2>Incidents Overview</h2>
+
+                        <p>
+                            Incident activity during the last 7 days
+                        </p>
+                    </div>
+
+                    <div class="card-period">
+                        Last 7 days
+                    </div>
+
+                </div>
+
+
+                <div class="chart-container">
+
+                    <canvas id="incidentTrendChart"></canvas>
+
+                </div>
+
+
+                <div class="chart-summary">
+
+                    <div class="chart-summary-item">
+
+                        <span class="summary-dot summary-blue"></span>
+
+                        <div>
+                            <span>Open</span>
+                            <strong>{{ stats.open or 0 }}</strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="chart-summary-item">
+
+                        <span class="summary-dot summary-green"></span>
+
+                        <div>
+                            <span>Resolved</span>
+                            <strong>{{ stats.resolved or 0 }}</strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="chart-summary-item">
+
+                        <span class="summary-dot summary-orange"></span>
+
+                        <div>
+                            <span>Investigating</span>
+                            <strong>{{ stats.investigating or 0 }}</strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="chart-summary-item">
+
+                        <span class="summary-dot summary-red"></span>
+
+                        <div>
+                            <span>Critical</span>
+                            <strong>{{ stats.critical or 0 }}</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <!-- RECENT INCIDENTS -->
+
+            <article class="dashboard-card recent-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h2>Recent Incidents</h2>
+
+                        <p>
+                            Latest infrastructure and application issues.
+                        </p>
+                    </div>
+
+                    <a
+                        href="{{ url_for('incidents') }}"
+                        class="view-all"
+                    >
+                        View All
+                        <span>→</span>
+                    </a>
+
+                </div>
+
+
+                {% if recent_incidents %}
+
+                <div class="table-wrapper">
+
+                    <table class="incident-table">
+
+                        <thead>
+
+                            <tr>
+                                <th>ID</th>
+                                <th>Incident</th>
+                                <th>Category</th>
+                                <th>Severity</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th></th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                        {% for incident in recent_incidents %}
+
+                            <tr>
+
+                                <td class="incident-id">
+                                    INC-{{ "%04d"|format(incident.id) }}
+                                </td>
+
+
+                                <td>
+
+                                    <div class="incident-name">
+
+                                        <strong>
+                                            {{ incident.title }}
+                                        </strong>
+
+                                        <span>
+                                            {{ incident.description[:55] }}
+                                            {% if incident.description|length > 55 %}...{% endif %}
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+
+                                    <span class="category-badge">
+                                        <span></span>
+                                        {{ incident.category }}
+                                    </span>
+
+                                </td>
+
+
+                                <td>
+
+                                    <span class="
+                                        severity-badge
+                                        severity-{{ incident.severity|lower }}
+                                    ">
+                                        {{ incident.severity }}
+                                    </span>
+
+                                </td>
+
+
+                                <td>
+
+                                    <span class="
+                                        status-badge
+                                        status-{{ incident.status|lower|replace(' ', '-') }}
+                                    ">
+                                        {{ incident.status }}
+                                    </span>
+
+                                </td>
+
+
+                                <td class="created-date">
+
+                                    {% if incident.created_at %}
+
+                                        {{ incident.created_at.strftime('%d %b %Y') }}
+
+                                        <small>
+                                            {{ incident.created_at.strftime('%H:%M') }}
+                                        </small>
+
+                                    {% else %}
+
+                                        —
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    <a
+                                        href="{{ url_for('incident_detail', incident_id=incident.id) }}"
+                                        class="incident-arrow"
+                                        title="View incident"
+                                    >
+                                        →
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                {% else %}
+
+
+                <div class="empty-dashboard-state">
+
+                    <div class="empty-icon">
+                        ⚡
+                    </div>
+
+                    <h3>No incidents yet</h3>
+
+                    <p>
+                        Your operations dashboard is quiet.
+                        Create your first incident to start tracking issues.
+                    </p>
+
+                    <a
+                        href="{{ url_for('incidents') }}"
+                        class="secondary-action"
+                    >
+                        Create Incident
+                    </a>
+
+                </div>
+
+
+                {% endif %}
+
+            </article>
+
+        </div>
+
+
+        <!-- RIGHT SIDE -->
+
+        <aside class="dashboard-side-column">
+
+
+            <!-- CATEGORY DONUT -->
+
+            <article class="dashboard-card category-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h2>Incidents by Category</h2>
+
+                        <p>
+                            Distribution of reported issues
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="donut-wrapper">
+
+                    <div class="donut-container">
+
+                        <canvas id="categoryChart"></canvas>
+
+                        <div class="donut-center">
+
+                            <strong>
+                                {{ stats.total or 0 }}
+                            </strong>
+
+                            <span>
+                                Total
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="category-legend"
+                        id="categoryLegend"
+                    ></div>
+
+                </div>
+
+            </article>
+
+
+            <!-- QUICK ACTIONS -->
+
+            <article class="dashboard-card quick-actions-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h2>Quick Actions</h2>
+
+                        <p>
+                            Common operations
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="quick-actions-list">
+
+
+                    <a
+                        href="{{ url_for('incidents') }}"
+                        class="quick-action-item"
+                    >
+
+                        <div class="quick-action-icon action-blue">
+                            ＋
+                        </div>
+
+                        <div>
+                            <strong>
+                                Create New Incident
+                            </strong>
+
+                            <span>
+                                Report a new issue
+                            </span>
+                        </div>
+
+                        <span class="quick-arrow">
+                            →
+                        </span>
+
+                    </a>
+
+
+                    <a
+                        href="{{ url_for('incidents') }}"
+                        class="quick-action-item"
+                    >
+
+                        <div class="quick-action-icon action-indigo">
+                            ≡
+                        </div>
+
+                        <div>
+                            <strong>
+                                View All Incidents
+                            </strong>
+
+                            <span>
+                                Browse incident records
+                            </span>
+                        </div>
+
+                        <span class="quick-arrow">
+                            →
+                        </span>
+
+                    </a>
+
+
+                    <a
+                        href="{{ url_for('history') }}"
+                        class="quick-action-item"
+                    >
+
+                        <div class="quick-action-icon action-green">
+                            ✓
+                        </div>
+
+                        <div>
+                            <strong>
+                                Resolved History
+                            </strong>
+
+                            <span>
+                                Review resolved issues
+                            </span>
+                        </div>
+
+                        <span class="quick-arrow">
+                            →
+                        </span>
+
+                    </a>
+
+
+                    <a
+                        href="{{ url_for('assistant') }}"
+                        class="quick-action-item"
+                    >
+
+                        <div class="quick-action-icon action-purple">
+                            ✦
+                        </div>
+
+                        <div>
+                            <strong>
+                                AI Assistant
+                            </strong>
+
+                            <span>
+                                Troubleshoot with Ollama
+                            </span>
+                        </div>
+
+                        <span class="local-mini">
+                            LOCAL
+                        </span>
+
+                    </a>
+
+                </div>
+
+            </article>
+
+
+            <!-- AI CARD -->
+
+            <article class="dashboard-ai-card">
+
+                <div class="ai-card-glow"></div>
+
+
+                <div class="ai-card-header">
+
+                    <div class="ai-card-icon">
+                        ✦
+                    </div>
+
+                    <strong>
+                        AI Assistant
+                    </strong>
+
+                    <span class="ai-local-badge">
+                        LOCAL
+                    </span>
+
+                </div>
+
+
+                <h3>
+                    Need help troubleshooting?
+                </h3>
+
+
+                <p>
+                    Ask your Ollama-powered assistant about Docker,
+                    Kubernetes, Linux, AWS, CI/CD and infrastructure issues.
+                </p>
+
+
+                <div class="ai-tags">
+
+                    <span>Docker</span>
+                    <span>Kubernetes</span>
+                    <span>AWS</span>
+
+                </div>
+
+
+                <a
+                    href="{{ url_for('assistant') }}"
+                    class="ai-open-button"
+                >
+                    <span>
+                        Open AI Assistant
+                    </span>
+
+                    <span>
+                        →
+                    </span>
+                </a>
+
+            </article>
+
+        </aside>
+
+    </section>
+
+</div>
+
+
+<!-- Dashboard data for JavaScript -->
+
+<script>
+
+window.dashboardData = {
+
+    trendLabels:
+        {{ trend_labels | default([]) | tojson }},
+
+    trendValues:
+        {{ trend_values | default([]) | tojson }},
+
+    categoryLabels:
+        {{ category_labels | default([]) | tojson }},
+
+    categoryValues:
+        {{ category_values | default([]) | tojson }}
+
+};
+
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script
+    src="{{ url_for('static', filename='dashboard.js') }}"
+></script>
+
+{% endblock %}

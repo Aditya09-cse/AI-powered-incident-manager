@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#070a12"
+    >
+
+    <title>
+        {% block title %}IncidentAI{% endblock %}
+    </title>
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                <span>AI</span>
+            </div>
+
+            <div class="brand-copy">
+                <strong>IncidentAI</strong>
+                <span>Operations Console</span>
+            </div>
+
+        </div>
+
+
+        <div class="sidebar-section">
+
+            <span class="sidebar-label">
+                WORKSPACE
+            </span>
+
+            <nav class="nav">
+
+                <a
+                    href="{{ url_for('dashboard') }}"
+                    class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}"
+                >
+                    <span class="nav-icon">⌂</span>
+
+                    <span>Dashboard</span>
+                </a>
+
+
+                <a
+                    href="{{ url_for('incidents') }}"
+                    class="nav-link {% if request.endpoint in ['incidents', 'incident_detail'] %}active{% endif %}"
+                >
+                    <span class="nav-icon">⚡</span>
+
+                    <span>Incidents</span>
+                </a>
+
+
+                <a
+                    href="{{ url_for('history') }}"
+                    class="nav-link {% if request.endpoint == 'history' %}active{% endif %}"
+                >
+                    <span class="nav-icon">↻</span>
+
+                    <span>History</span>
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <div class="sidebar-section">
+
+            <span class="sidebar-label">
+                INTELLIGENCE
+            </span>
+
+            <nav class="nav">
+
+                <a
+                    href="{{ url_for('assistant') }}"
+                    class="nav-link ai-nav {% if request.endpoint == 'assistant' %}active{% endif %}"
+                >
+                    <span class="nav-icon">✦</span>
+
+                    <span>AI Assistant</span>
+
+                    <span class="ai-badge">
+                        LOCAL
+                    </span>
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <div class="sidebar-status">
+
+            <div class="status-title">
+
+                <span class="live-dot"></span>
+
+                Local Stack
+
+            </div>
+
+            <div class="stack-item">
+                <span>Flask API</span>
+                <span class="stack-status">Running</span>
+            </div>
+
+            <div class="stack-item">
+                <span>PostgreSQL</span>
+                <span class="stack-status">Connected</span>
+            </div>
+
+            <div class="stack-item">
+                <span>Ollama</span>
+                <span class="stack-status">Local</span>
+            </div>
+
+        </div>
+
+
+        <div class="sidebar-footer">
+
+            <div class="avatar">
+                AT
+            </div>
+
+            <div>
+                <strong>DevOps Workspace</strong>
+                <span>Development</span>
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <div class="workspace">
+
+        <header class="topbar">
+
+            <button
+                class="mobile-menu"
+                id="mobileMenu"
+                type="button"
+            >
+                ☰
+            </button>
+
+
+            <div class="environment">
+
+                <span class="environment-dot"></span>
+
+                Development
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <span class="model-label">
+                    llama3.2:3b
+                </span>
+
+                <div class="top-avatar">
+                    AI
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <main class="main-content">
+
+            {% block content %}
+            {% endblock %}
+
+        </main>
+
+    </div>
+
+</div>
+
+
+<script
+    src="{{ url_for('static', filename='app.js') }}"
+></script>
+
+</body>
+</html>

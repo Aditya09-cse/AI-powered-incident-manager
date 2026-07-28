@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}
+History | IncidentAI
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <p class="eyebrow">
+            KNOWLEDGE BASE
+        </p>
+
+        <h1>Incident History</h1>
+
+        <p class="subtitle">
+            Review incidents that have already been resolved.
+        </p>
+
+    </div>
+
+</div>
+
+
+<section class="panel">
+
+    <form
+        method="GET"
+        class="filters history-search"
+    >
+
+        <input
+            type="search"
+            name="search"
+            value="{{ search }}"
+            placeholder="Search resolved incidents..."
+        >
+
+        <button
+            class="button secondary"
+            type="submit"
+        >
+            Search
+        </button>
+
+    </form>
+
+
+    {% if incidents %}
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Incident</th>
+                    <th>Category</th>
+                    <th>Severity</th>
+                    <th>Created</th>
+                    <th>Resolved</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for incident in incidents %}
+
+                <tr>
+
+                    <td>
+                        INC-{{ "%04d"|format(incident.id) }}
+                    </td>
+
+                    <td>
+                        <a
+                            class="incident-link"
+                            href="{{ url_for('incident_detail', incident_id=incident.id) }}"
+                        >
+                            {{ incident.title }}
+                        </a>
+                    </td>
+
+                    <td>
+                        {{ incident.category }}
+                    </td>
+
+                    <td>
+                        <span class="badge severity-{{ incident.severity|lower }}">
+                            {{ incident.severity }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ incident.created_at.strftime("%d %b %Y") }}
+                    </td>
+
+                    <td>
+
+                        {% if incident.resolved_at %}
+
+                            {{ incident.resolved_at.strftime("%d %b %Y %H:%M") }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+        <div class="empty-state">
+
+            <h3>No resolved incidents</h3>
+
+            <p>
+                Incidents marked as Resolved will appear here.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}
