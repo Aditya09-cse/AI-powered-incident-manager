@@ -1,0 +1,10 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: database-variable
+  namespace: ai-incident-namespace
+data:
+  DB_NAME: incident_manager
+  DB_USER: incident_user
+  DB_HOST: postgres
+  DB_PORT: "5432"

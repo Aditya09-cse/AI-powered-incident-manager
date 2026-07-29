@@ -29,3 +29,5 @@ logs/
 *.db
 *.sqlite
 *.sqlite3
+# Kubernetes secrets
+k8s/secrets.yml

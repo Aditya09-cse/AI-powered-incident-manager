@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: ai-incident-service
+  namespace: ai-incident-namespace
+
+spec:
+  selector:
+    app: ai-incident-manager
+
+  ports:
+  - port: 80
+    targetPort: 5001
+
+  type: NodePort

@@ -1,0 +1,14 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: ollama-incident-pvc
+  namespace: ai-incident-namespace
+spec:
+  storageClassName: manual
+
+  accessModes: 
+  - ReadWriteOnce
+
+  resources:  
+    requests:
+      storage: 1Gi

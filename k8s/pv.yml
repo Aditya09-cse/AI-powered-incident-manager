@@ -1,0 +1,16 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ai-incident-pv
+spec:
+  storageClassName: manual
+
+  capacity:
+    storage: 512Mi
+
+  accessModes:
+    - ReadWriteOnce
+
+  hostPath:
+    path: /data/ai-app
+
