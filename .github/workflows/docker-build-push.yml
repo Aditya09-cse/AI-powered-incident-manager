@@ -28,5 +28,5 @@ jobs:
             push: true
             tags: |
               ${{ vars.DOCKERHUB_USER}}/ai-powered-incident-manager-app:${{github.ref_name}}  
-              ${{ vars.DOCKERHUB_USER}}/ai-powered-incident-manager-applatest
+              ${{ vars.DOCKERHUB_USER}}/ai-powered-incident-manager-app:latest
               ${{ vars.DOCKERHUB_USER}}/ai-powered-incident-manager-app:${{ github.sha }}

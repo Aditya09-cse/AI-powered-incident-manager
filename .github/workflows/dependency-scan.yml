@@ -6,7 +6,7 @@ on:
   workflow_call:
 
 jobs:
-  dependecy-check:
+  dependency-check:
     runs-on: ubuntu-latest
 
     steps:
