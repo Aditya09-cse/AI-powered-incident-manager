@@ -2,331 +2,201 @@
 
 # ⚡ IncidentAI
 
-### AI-Powered Incident Management & DevOps Troubleshooting
+## AI-Powered Incident Management & DevOps Troubleshooting Platform
 
-Track incidents. Investigate failures. Get AI-assisted troubleshooting.  
-All inside a self-hosted, containerized environment.
+A self-hosted incident management platform combining  
+**Flask + PostgreSQL + Ollama + Kubernetes** to help engineers track, investigate, and resolve infrastructure issues with local AI assistance.
 
 <br>
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Flask](https://img.shields.io/badge/Flask-3.x-000000?style=for-the-badge&logo=flask&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-3.x-black?style=for-the-badge&logo=flask&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Ollama](https://img.shields.io/badge/Ollama-Local_AI-111111?style=for-the-badge)
+![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-Deployed-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
+![Ollama](https://img.shields.io/badge/Ollama-Local_AI-black?style=for-the-badge)
 
 </div>
 
 ---
 
-## What is IncidentAI?
+# 🚀 Overview
 
-IncidentAI is a **self-hosted DevOps incident management platform** that combines traditional incident tracking with local AI-assisted troubleshooting.
+IncidentAI is a self-hosted DevOps incident management platform designed for engineers who need a practical way to:
 
-Instead of only recording:
+- Record operational incidents
+- Track incident lifecycle
+- Investigate failures
+- Generate AI-assisted troubleshooting reports
+- Maintain historical incident knowledge
 
-> "Docker container keeps restarting"
-
-IncidentAI lets you track that incident through its lifecycle and use a locally running LLM to help investigate **why it is happening and what to check next**.
-
-```text
-Report Incident
-      │
-      ▼
-Classify & Track
-      │
-      ▼
-Investigate
-      │
-      ├───────────────┐
-      ▼               ▼
-Incident Data      Ollama AI
-      │               │
-      ▼               ▼
- PostgreSQL      Troubleshooting
-      │               │
-      └───────┬───────┘
-              ▼
-           Resolve
-```
+The platform runs a local Large Language Model using Ollama, meaning incident data stays inside your own infrastructure.
 
 No external AI API is required.
 
 ---
 
-## ✨ What You Can Do
+# ✨ Features
 
-<table>
-<tr>
-<td width="50%">
+## 🚨 Incident Management
 
-### 🚨 Manage Incidents
+Create and manage incidents with:
 
-Create incidents with:
-
-- Title & description
+- Title
+- Description
 - Category
 - Severity
-- Operational status
+- Status
 
-Track them through:
+Incident lifecycle:
 
-`Open → Investigating → Resolved`
+```
+OPEN
+  |
+  v
+INVESTIGATING
+  |
+  v
+RESOLVED
+```
 
-</td>
+---
 
-<td width="50%">
+## 🤖 AI Incident Analysis
 
-### 🤖 Analyze with AI
+IncidentAI sends incident context to a local Ollama model and generates structured troubleshooting guidance.
 
-Send an incident to Ollama and receive:
+AI provides:
 
-- Incident summary
-- Possible root causes
-- Troubleshooting steps
-- Useful commands
-- Recommended fixes
-- Prevention suggestions
+```
+SUMMARY
 
-</td>
-</tr>
+LIKELY ROOT CAUSES
 
-<tr>
-<td>
+TROUBLESHOOTING STEPS
 
-### 📊 Monitor Operations
+COMMANDS
 
-The dashboard provides visibility into:
+RECOMMENDED FIX
 
-- Total incidents
-- Open incidents
-- Investigations
-- Resolved incidents
-- Critical incidents
-- Recent activity
+PREVENTION
+```
 
-</td>
+Example supported areas:
 
-<td>
+- Kubernetes troubleshooting
+- Docker issues
+- Linux debugging
+- PostgreSQL failures
+- Networking problems
+- CI/CD failures
+- Cloud infrastructure concepts
 
-### 🧠 Ask the DevOps Assistant
+---
 
-Use the standalone AI assistant for troubleshooting:
+## 💬 DevOps AI Assistant
 
-`Linux` · `Docker` · `Kubernetes` · `AWS`  
-`CI/CD` · `Terraform` · `Networking` · `PostgreSQL`
+A conversational assistant for engineers.
 
-Chat history is persisted in PostgreSQL.
+Example questions:
 
-</td>
-</tr>
-</table>
+```
+Why is my Kubernetes pod restarting?
+
+How do I debug PostgreSQL connection issues?
+
+Why is my Docker container failing?
+
+How do I troubleshoot nginx 502 errors?
+```
+
+Chat history is stored in PostgreSQL.
 
 ---
 
 # 🏗 Architecture
 
-```text
-                         ┌──────────────────────┐
-                         │        USER          │
-                         │       Browser        │
-                         └──────────┬───────────┘
-                                    │
-                                    │ :5001
-                                    ▼
-                    ┌───────────────────────────────┐
-                    │          IncidentAI           │
-                    │                               │
-                    │       Flask + Gunicorn        │
-                    │                               │
-                    │  ┌─────────┐   ┌───────────┐  │
-                    │  │Dashboard│   │ Incidents │  │
-                    │  └─────────┘   └───────────┘  │
-                    │                               │
-                    │  ┌─────────┐   ┌───────────┐  │
-                    │  │ History │   │AI Assistant│ │
-                    │  └─────────┘   └───────────┘  │
-                    └───────────────┬───────────────┘
-                                    │
-                             Docker Network
-                                    │
-                     ┌──────────────┴──────────────┐
-                     │                             │
-                     ▼                             ▼
-           ┌───────────────────┐         ┌───────────────────┐
-           │    PostgreSQL     │         │      Ollama       │
-           │                   │         │                   │
-           │    Incidents      │         │    Llama 3.2      │
-           │    AI Analysis    │         │                   │
-           │    Chat History   │         │  Local Inference  │
-           └─────────┬─────────┘         └─────────┬─────────┘
-                     │                             │
-                     ▼                             ▼
-              postgres-data                  ollama-data
-               Docker Volume                  Docker Volume
 ```
+                         USER
+                          |
+                          |
+                          v
 
-The services communicate through a private Docker bridge network.
+                  Flask Application
+                  Gunicorn Server
 
-```text
-IncidentAI ──────► postgres:5432
-     │
-     └───────────► ollama:11434
+                          |
+          ---------------------------------
+          |                               |
+          v                               v
+
+     PostgreSQL                      Ollama
+     Database                       Local LLM
+
+          |                               |
+          |                               |
+          v                               v
+
+     Incident Data                  AI Analysis
+     Chat History                   Inference
 ```
-
-PostgreSQL and Ollama do not need to be exposed directly to the host.
 
 ---
 
-# 🧩 System Components
+# ☸ Kubernetes Architecture
 
-| Component | Role |
+IncidentAI is deployed using Kubernetes resources.
+
+```
+                 Kubernetes Cluster
+
+                        |
+        --------------------------------
+
+             |              |              |
+
+             v              v              v
+
+        Flask App      PostgreSQL       Ollama
+        Deployment     Deployment      Deployment
+
+
+             |              |              |
+
+             v              v              v
+
+             PVC            PVC            PVC
+
+
+             |
+             v
+
+       Persistent Storage
+```
+
+---
+
+# 🧩 Technology Stack
+
+| Component | Purpose |
 |---|---|
-| **Flask** | Application backend and routing |
-| **Gunicorn** | WSGI application server |
-| **PostgreSQL** | Persistent incident, analysis and chat storage |
-| **Ollama** | Local LLM inference service |
-| **Llama 3.2** | DevOps troubleshooting model |
-| **Docker** | Application containerization |
-| **Docker Compose** | Multi-container service orchestration |
-| **Docker Volumes** | Persistent database and model storage |
+| Python | Application development |
+| Flask | Backend framework |
+| Gunicorn | Production WSGI server |
+| PostgreSQL 16 | Persistent database |
+| Ollama | Local LLM inference |
+| TinyLlama | AI troubleshooting model |
+| Docker | Containerization |
+| Kubernetes | Container orchestration |
+| Persistent Volumes | Data persistence |
+| ConfigMap | Application configuration |
+| Secrets | Sensitive configuration |
 
 ---
 
-# 🔥 Incident Workflow
+# 📂 Repository Structure
 
-An incident begins as:
-
-```text
-OPEN
 ```
-
-and progresses through:
-
-```text
-┌──────────────┐
-│     OPEN     │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│INVESTIGATING │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│   RESOLVED   │
-└──────────────┘
-```
-
-Incident records remain available after resolution, providing a searchable history of previous operational problems.
-
----
-
-# 🤖 AI Incident Analysis
-
-AI analysis is attached directly to an incident.
-
-For example:
-
-```text
-Incident
-────────────────────────────────────
-
-Title:
-Docker container continuously restarting
-
-Category:
-Docker
-
-Severity:
-High
-
-Description:
-Container exits several seconds after startup.
-```
-
-IncidentAI sends the incident context to Ollama and asks for structured troubleshooting guidance:
-
-```text
-AI Analysis
-────────────────────────────────────
-
-SUMMARY
-The application process is terminating after startup.
-
-LIKELY CAUSES
-• Invalid startup command
-• Missing environment variable
-• Dependency failure
-• Database connection failure
-
-TROUBLESHOOTING
-1. Inspect container logs
-2. Check container exit code
-3. Inspect environment configuration
-4. Verify dependent services
-
-COMMANDS
-docker logs <container>
-docker inspect <container>
-docker compose ps
-
-PREVENTION
-Add health checks and validate required configuration
-before application startup.
-```
-
-AI analyses are stored in PostgreSQL so they remain associated with the incident.
-
----
-
-# 🗄️ Data Model
-
-IncidentAI stores three main types of data.
-
-```text
-┌─────────────────────┐
-│      incidents      │
-├─────────────────────┤
-│ id                  │
-│ title               │
-│ description         │
-│ category            │
-│ severity            │
-│ status              │
-│ created_at          │
-│ updated_at          │
-│ resolved_at         │
-└──────────┬──────────┘
-           │
-           │ 1 : N
-           ▼
-┌─────────────────────┐
-│    ai_analyses      │
-├─────────────────────┤
-│ id                  │
-│ incident_id         │
-│ analysis            │
-│ created_at          │
-└─────────────────────┘
-
-
-┌─────────────────────┐
-│    chat_history     │
-├─────────────────────┤
-│ id                  │
-│ user_message        │
-│ ai_response         │
-│ created_at          │
-└─────────────────────┘
-```
-
----
-
-# 📁 Repository Structure
-
-```text
 AI-powered-incident-manager
 │
 ├── app
@@ -336,298 +206,434 @@ AI-powered-incident-manager
 │   ├── requirements.txt
 │   │
 │   ├── static
-│   │   ├── app.js
-│   │   └── style.css
 │   │
 │   └── templates
-│       ├── assistant.html
-│       ├── base.html
-│       ├── dashboard.html
-│       ├── history.html
-│       ├── incident.html
-│       ├── incidents.html
-│       └── index.html
 │
 ├── database
 │   └── init.sql
 │
+├── k8s
+│   │
+│   ├── namespace.yml
+│   │
+│   ├── app-deployment.yml
+│   ├── flask-service.yml
+│   │
+│   ├── postgres-deployment.yml
+│   ├── postgres-service.yml
+│   │
+│   ├── ollama-deployment.yml
+│   ├── ollama-service.yml
+│   │
+│   ├── pv.yml
+│   ├── pvc.yml
+│   │
+│   ├── ollama-pv.yml
+│   ├── ollama-pvc.yml
+│   │
+│   ├── ConfigMap.yml
+│   └── secrets.yml
+│
 ├── Dockerfile
 ├── docker-compose.yml
 ├── .env.example
-├── .gitignore
 └── README.md
 ```
 
 ---
 
-# 🚀 Run IncidentAI
+# 🚀 Kubernetes Deployment
 
-## 1. Clone
-
-```bash
-git clone https://github.com/Aditya09-cse/AI-powered-incident-manager.git
-
-cd AI-powered-incident-manager
-```
-
-## 2. Configure
-
-Create your local environment file:
+## 1. Create Namespace
 
 ```bash
-cp .env.example .env
+kubectl apply -f k8s/namespace.yml
 ```
-
-Configure:
-
-```env
-DB_NAME=incident_manager
-DB_USER=incident_user
-DB_PASSWORD=your_secure_password
-
-FLASK_HOST=0.0.0.0
-FLASK_PORT=5001
-
-OLLAMA_URL=http://ollama:11434
-OLLAMA_MODEL=llama3.2:1b
-```
-
-`.env` is intentionally excluded from Git.
-
-## 3. Start the Stack
-
-```bash
-docker compose up -d
-```
-
-Verify:
-
-```bash
-docker compose ps
-```
-
-You should have:
-
-```text
-devops-ai-app
-devops-ai-postgres
-devops-ai-ollama
-```
-
-## 4. Pull the AI Model
-
-Ollama does not download a model automatically.
-
-```bash
-docker exec -it devops-ai-ollama \
-  ollama pull llama3.2:1b
-```
-
-Verify:
-
-```bash
-docker exec devops-ai-ollama ollama list
-```
-
-## 5. Open
-
-```text
-http://localhost:5001
-```
-
-That's it.
 
 ---
 
-# 🩺 Health, Readiness & Metrics
-
-IncidentAI exposes operational endpoints that can later integrate with monitoring systems and container orchestrators.
-
-### Liveness
+## 2. Apply Configuration
 
 ```bash
-curl http://localhost:5001/health
+kubectl apply -f k8s/ConfigMap.yml
 ```
 
-### Readiness
+---
+
+## 3. Create Persistent Storage
+
+Application storage:
 
 ```bash
-curl http://localhost:5001/ready
+kubectl apply -f k8s/pv.yml
+kubectl apply -f k8s/pvc.yml
 ```
 
-Readiness checks the application's dependencies:
+Ollama model storage:
 
-```text
+```bash
+kubectl apply -f k8s/ollama-pv.yml
+kubectl apply -f k8s/ollama-pvc.yml
+```
+
+---
+
+## 4. Deploy PostgreSQL
+
+```bash
+kubectl apply -f k8s/postgres-deployment.yml
+kubectl apply -f k8s/postgres-service.yml
+```
+
+---
+
+## 5. Deploy Ollama
+
+```bash
+kubectl apply -f k8s/ollama-deployment.yml
+kubectl apply -f k8s/ollama-service.yml
+```
+
+---
+
+## 6. Deploy Application
+
+```bash
+kubectl apply -f k8s/app-deployment.yml
+kubectl apply -f k8s/flask-service.yml
+```
+
+---
+
+## Verify Deployment
+
+```bash
+kubectl get pods -n ai-incident-namespace
+```
+
+Expected:
+
+```
+ai-incident-deployment     Running
+postgres-deployment        Running
+ollama                     Running
+```
+
+---
+
+# 🔌 Service Communication
+
+Inside Kubernetes:
+
+```
+Flask Application
+
+        |
+        |
+
+postgres:5432
+
+
+        |
+        |
+
+ollama:11434
+```
+
+Services communicate internally through Kubernetes DNS.
+
+---
+
+# 💾 Database Design
+
+IncidentAI uses PostgreSQL with three main tables.
+
+```
+                incidents
+
+                    |
+                    |
+                    v
+
+              ai_analyses
+
+
+              chat_history
+```
+
+---
+
+## incidents
+
+Stores operational incidents:
+
+```
+id
+title
+description
+category
+severity
+status
+created_at
+updated_at
+resolved_at
+```
+
+---
+
+## ai_analyses
+
+Stores AI generated investigation reports:
+
+```
+id
+incident_id
+analysis
+created_at
+```
+
+---
+
+## chat_history
+
+Stores DevOps assistant conversations:
+
+```
+id
+user_message
+ai_response
+created_at
+```
+
+---
+
+# 🤖 AI Workflow
+
+```
+Incident Created
+
+        |
+        v
+
+Incident Details
+
+        |
+        v
+
+Ollama Local Model
+
+        |
+        v
+
+AI Troubleshooting Report
+
+        |
+        v
+
+Stored in PostgreSQL
+```
+
+---
+
+# 🩺 Health Checks
+
+The application supports health endpoints for monitoring.
+
+## Liveness
+
+```
+GET /health
+```
+
+Checks whether the application is running.
+
+---
+
+## Readiness
+
+```
+GET /ready
+```
+
+Checks application dependencies:
+
+```
 Application
-    │
-    ├── PostgreSQL  ✓
-    │
-    └── Ollama      ✓
+
+   |
+   +---- PostgreSQL
+
+   |
+   +---- Ollama
 ```
-
-If required dependencies are unavailable, the endpoint returns an unhealthy readiness response.
-
-### Metrics
-
-```bash
-curl http://localhost:5001/metrics
-```
-
-Currently exposed incident metrics include:
-
-```text
-incidents_total
-incidents_open
-incidents_investigating
-incidents_resolved
-```
-
-These are exposed in Prometheus-compatible text format.
 
 ---
 
-# 🐳 Container Design
+# 🔐 Security
 
-The application is served using **Gunicorn**, rather than Flask's development server.
+Sensitive information should never be committed.
 
-```text
-Container
-   │
-   ▼
-Gunicorn
-   │
-   ├── Worker
-   └── Worker
-         │
-         ▼
-       Flask
+Ignored files:
+
 ```
-
-The application container also runs using a dedicated **non-root user**.
-
-Persistent state is kept outside containers:
-
-```text
-PostgreSQL Container
-        │
-        ▼
-  postgres-data
-
-
-Ollama Container
-        │
-        ▼
-    ollama-data
-```
-
-This allows containers to be recreated without losing incident records or downloaded models.
-
----
-
-# 🔐 Configuration & Secrets
-
-Real credentials belong in:
-
-```text
 .env
+k8s/secrets.yml
 ```
 
-The repository contains:
+Use:
 
-```text
+```
 .env.example
 ```
 
-only as a configuration template.
+as a template.
 
-Never commit:
+Secrets should be managed using:
 
-- Database passwords
-- API keys
-- Cloud credentials
-- Access tokens
-- Private keys
+- Kubernetes Secrets
+- External secret managers
+- Environment injection
 
 ---
 
-# 🛠 Useful Commands
+# 🐳 Docker Development
+
+Run locally:
 
 ```bash
-# Start
 docker compose up -d
+```
 
-# Check services
+Check containers:
+
+```bash
 docker compose ps
+```
 
-# Application logs
-docker logs -f devops-ai-app
+Stop:
 
-# Ollama logs
-docker logs -f devops-ai-ollama
-
-# Database logs
-docker logs -f devops-ai-postgres
-
-# Installed AI models
-docker exec devops-ai-ollama ollama list
-
-# Stop
+```bash
 docker compose down
 ```
 
-Avoid:
+---
+
+# 🛠 Useful Kubernetes Commands
+
+View pods:
 
 ```bash
-docker compose down -v
+kubectl get pods -n ai-incident-namespace
 ```
 
-unless you intentionally want to remove persistent database and Ollama volumes.
+View services:
+
+```bash
+kubectl get svc -n ai-incident-namespace
+```
+
+View logs:
+
+```bash
+kubectl logs <pod-name> -n ai-incident-namespace
+```
+
+Enter container:
+
+```bash
+kubectl exec -it <pod-name> \
+-n ai-incident-namespace -- bash
+```
+
+Port forward application:
+
+```bash
+kubectl port-forward \
+svc/ai-incident-service \
+5001:80 \
+-n ai-incident-namespace
+```
 
 ---
 
-# 🧪 Built for DevOps Experimentation
+# 📈 Engineering Roadmap
 
-IncidentAI is intentionally designed as more than a CRUD application.
+## Completed ✅
 
-Its architecture provides a practical workload for applying DevOps concepts around a real system:
+- Incident management
+- PostgreSQL persistence
+- AI incident analysis
+- DevOps assistant
+- Docker containerization
+- Kubernetes deployment
+- Persistent storage
+- ConfigMap integration
+- Kubernetes Secrets
+- Ollama local inference
+- Health probes
 
-```text
-                    IncidentAI
-                        │
-          ┌─────────────┼─────────────┐
-          │             │             │
-     Application    PostgreSQL      Ollama
-          │             │             │
-          └─────────────┼─────────────┘
-                        │
-                     Docker
-                        │
-                 Docker Compose
-```
-
-This provides a foundation for future work involving CI/CD, container security, Kubernetes, observability, and infrastructure automation without claiming those capabilities are already implemented.
 
 ---
 
-# 📍 Current Status
+## Future Improvements 🚧
 
-**Working**
+### CI/CD
 
-`Incident Management` · `PostgreSQL Persistence` · `Incident History`  
-`AI Incident Analysis` · `DevOps AI Assistant` · `Docker`  
-`Docker Compose` · `Gunicorn` · `Health Checks` · `Metrics`
+- GitHub Actions pipeline
+- Automated image builds
+- Container security scanning
+- Automated Kubernetes deployment
 
-**Next engineering milestone**
 
-CI/CD and DevSecOps automation.
+### Observability
+
+- Prometheus metrics
+- Grafana dashboards
+- Centralized logging
+- Distributed tracing
+
+
+### AI Improvements
+
+- Larger local models
+- RAG based incident knowledge
+- Historical incident analysis
+- Automated remediation suggestions
+
+
+---
+
+# 🎯 Project Goal
+
+IncidentAI is designed as a practical DevOps engineering project combining:
+
+```
+Software Development
+
+        +
+
+Containerization
+
+        +
+
+Kubernetes
+
+        +
+
+Infrastructure Operations
+
+        +
+
+Local Artificial Intelligence
+```
 
 ---
 
 <div align="center">
 
-## IncidentAI
+# ⚡ IncidentAI
 
-**Track. Investigate. Resolve. Learn.**
+### Track. Investigate. Resolve. Learn.
 
 Built by **Aditya Singh Tomar**
 
