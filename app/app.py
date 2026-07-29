@@ -606,7 +606,7 @@ if __name__ == "__main__":
     app.run(
         host=os.getenv(
             "FLASK_HOST",
-            "0.0.0.0"
+            "0.0.0.0"  # nosec B104
         ),
         port=int(
             os.getenv(
