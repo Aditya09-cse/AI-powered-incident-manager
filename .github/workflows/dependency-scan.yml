@@ -1,0 +1,26 @@
+# packages - issues & vulnerabilities scan
+#pip-audit -> to scan vulnarabalities in  python code
+name: Dependency Scan
+
+on:
+  workflow_dispatch:
+  #workflow_call:
+
+jobs:
+  dependecy-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: code checkout
+        uses: actions/checkout@v4
+
+      - name: setup python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install pip audit
+        run: pip install pip-audit
+       
+      - name: audit dependecies
+        run: pip-audit -r app/requirements.txt
