@@ -1,0 +1,26 @@
+name: DevSecOps End To End Pipeline
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # CI (Continous Integration with Security Scanning)
+  Code-Quality:
+    uses: ./.github/workflows/code-quality.yml
+
+  Secrets-Scan:
+    uses: ./.github/workflows/secrets-scan.yml
+  
+  Dependency-Scan:
+    uses: ./.github/workflows/dependency-scan.yml
+
+  Docker-Scan:
+    uses: ./.github/workflows/docker-lint.yml
+  
+    # Build once the security scans are complete
+  Build:
+    needs: [Code-Quality,Secrets-Scan,Dependency-Scan,Docker-Scan]
+    uses: ./.github/workflows/docker-build-push.yml
+    secrets: inherit

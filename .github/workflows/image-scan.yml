@@ -1,10 +1,8 @@
 name: Image Scanner
 
 on:
-  #workflow_call
-  push:
-    branches:
-      - main
+  workflow_call:
+  
     
 jobs:
   imager-scanner:
@@ -22,7 +20,7 @@ jobs:
       - name: trivy scanner
         uses: aquasecurity/trivy-action@v0.20.0
         with:
-          image-ref: ${{ vars.DOCKERHUB_USER }}/github-actions-practice:${{ github.sha }}
+          image-ref: ${{ vars.DOCKERHUB_USER }}/ai-powered-incident-manager-app:${{ github.sha }}
           severity: 'CRITICAL,HIGH'
           exit-code: '1'
           trivyignores: ".trivyignore"

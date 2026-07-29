@@ -3,8 +3,7 @@
 name: Dependency Scan
 
 on:
-  workflow_dispatch:
-  #workflow_call:
+  workflow_call:
 
 jobs:
   dependecy-check:
