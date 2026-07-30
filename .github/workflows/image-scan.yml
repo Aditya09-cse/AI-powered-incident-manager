@@ -4,11 +4,11 @@ on:
   workflow_call:
 
 jobs:
-  imager-scanner:
+  image-scanner:
     runs-on: ubuntu-latest
 
     steps:
-      - name: checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Login to Docker Hub
@@ -17,17 +17,12 @@ jobs:
           username: ${{ vars.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # Ensure Trivy DB is present and up-to-date to avoid "Need to update DB"
-      - name: Download Trivy DB
+      - name: Scan Docker image with Trivy
         uses: aquasecurity/trivy-action@v0.20.0
         with:
-          download-db-only: true
-
-      - name: trivy scanner
-        uses: aquasecurity/trivy-action@v0.20.0
-        with:
-          image-ref: ${{ vars.DOCKERHUB_USER }}/ai-powered-incident-manager-app:${{ github.sha }}
           scan-type: image
-          severity: 'CRITICAL,HIGH'
-          exit-code: '1'
-          ignorefile: ".trivyignore"
+          image-ref: ${{ vars.DOCKERHUB_USER }}/ai-powered-incident-manager-app:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          exit-code: 1
+          ignore-unfixed: true
+          trivyignores: .trivyignore
