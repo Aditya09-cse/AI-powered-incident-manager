@@ -18,8 +18,10 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       # Ensure Trivy DB is present and up-to-date to avoid "Need to update DB"
-      - name: Download Trivy DB
-        run: docker run --rm aquasec/trivy:latest --download-db-only
+      - name: Update Trivy DB
+        run: |
+          mkdir -p ${{ github.workspace }}/.cache
+          docker run --rm -v ${{ github.workspace }}/.cache:/root/.cache aquasec/trivy:latest db update
 
       - name: trivy scanner
         uses: aquasecurity/trivy-action@v0.20.0
