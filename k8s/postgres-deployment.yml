@@ -25,24 +25,6 @@ spec:
         ports:
         - containerPort: 5432
 
-        livenessProbe:
-          exec:
-            command:
-            - pg_isready
-            - -U
-            - postgres
-          initialDelaySeconds: 30
-          periodSeconds: 10
-
-        readinessProbe:
-          exec:
-            command:
-            - pg_isready
-            - -U
-            - postgres
-          initialDelaySeconds: 10
-          periodSeconds: 5
-
         env:
         - name: POSTGRES_DB
           valueFrom:
@@ -61,3 +43,30 @@ spec:
             secretKeyRef:
               name: db-secrets
               key: DB_PASSWORD
+
+        volumeMounts:
+        - name: postgres-init
+          mountPath: /docker-entrypoint-initdb.d
+
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+          initialDelaySeconds: 10
+          periodSeconds: 5
+
+      volumes:
+      - name: postgres-init
+        configMap:
+          name: postgres-init
