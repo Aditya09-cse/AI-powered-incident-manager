@@ -8,6 +8,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Copy Kubernetes manifests to EC2
+      - name: Copy Kubernetes manifests
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.EC2_SSH_HOST }}
+          username: ${{ secrets.EC2_SSH_USER }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          source: "k8s/*"
+          target: "~/"
+
+      # Deploy application
       - name: Deploy to Kubernetes
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -16,13 +31,32 @@ jobs:
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 
           script: |
-            echo "Deploying new version..."
+            set -e
 
+            echo "========== Kubernetes Deployment Started =========="
+
+            # Verify cluster
+            kubectl get nodes
+
+            # Apply manifests
+            kubectl apply -f ~/k8s/
+
+            # Update application image
             kubectl set image deployment/ai-incident-deployment \
-            ai-incident-manager=aditya0910/ai-powered-incident-manager-app:${{ github.sha }} \
-            -n ai-incident-namespace
+              ai-incident-manager=aditya0910/ai-powered-incident-manager-app:${{ github.sha }} \
+              -n ai-incident-namespace
 
+            # Wait for rollout
             kubectl rollout status deployment/ai-incident-deployment \
-            -n ai-incident-namespace
+              -n ai-incident-namespace
 
-            echo "Deployment completed successfully!"
+            echo ""
+            echo "Pods:"
+            kubectl get pods -n ai-incident-namespace
+
+            echo ""
+            echo "Services:"
+            kubectl get svc -n ai-incident-namespace
+
+            echo ""
+            echo "Deployment Successful!"
