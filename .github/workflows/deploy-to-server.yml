@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
       # Checkout repository
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -19,10 +20,10 @@ jobs:
           host: ${{ secrets.EC2_SSH_HOST }}
           username: ${{ secrets.EC2_SSH_USER }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          source: "k8s/*"
+          source: "k8s"
           target: "~/"
 
-      # Deploy application
+      # Deploy to Kubernetes
       - name: Deploy to Kubernetes
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -35,28 +36,108 @@ jobs:
 
             echo "========== Kubernetes Deployment Started =========="
 
-            # Verify cluster
+            # Verify Kubernetes cluster
+            echo "Checking Kubernetes cluster..."
             kubectl get nodes
 
-            # Apply manifests
-            kubectl apply -f ~/k8s/
+            # ------------------------------------------------
+            # 1. Create namespace
+            # ------------------------------------------------
+            echo "Creating namespace..."
 
-            # Update application image
+            kubectl apply -f ~/k8s/namespace.yml
+
+            kubectl wait \
+              --for=jsonpath='{.status.phase}'=Active \
+              namespace/ai-incident-namespace \
+              --timeout=60s
+
+            # ------------------------------------------------
+            # 2. Create / update Kubernetes Secret
+            # ------------------------------------------------
+            echo "Creating database secret..."
+
+            kubectl create secret generic db-secrets \
+              --from-literal=DB_PASSWORD='${{ secrets.DB_PASSWORD }}' \
+              -n ai-incident-namespace \
+              --dry-run=client \
+              -o yaml | kubectl apply -f -
+
+            # ------------------------------------------------
+            # 3. Apply ConfigMaps
+            # ------------------------------------------------
+            echo "Applying ConfigMaps..."
+
+            kubectl apply -f ~/k8s/ConfigMap.yml
+            kubectl apply -f ~/k8s/postgres-init.yml
+
+            # ------------------------------------------------
+            # 4. Apply storage
+            # ------------------------------------------------
+            echo "Applying storage..."
+
+            kubectl apply -f ~/k8s/pv.yml
+            kubectl apply -f ~/k8s/pvc.yml
+
+            kubectl apply -f ~/k8s/ollama-pv.yml
+            kubectl apply -f ~/k8s/ollama-pvc.yml
+
+            # ------------------------------------------------
+            # 5. Deploy PostgreSQL
+            # ------------------------------------------------
+            echo "Deploying PostgreSQL..."
+
+            kubectl apply -f ~/k8s/postgres-deployment.yml
+            kubectl apply -f ~/k8s/postgres-service.yml
+
+            # ------------------------------------------------
+            # 6. Deploy Ollama
+            # ------------------------------------------------
+            echo "Deploying Ollama..."
+
+            kubectl apply -f ~/k8s/ollama-deployment.yml
+            kubectl apply -f ~/k8s/ollama-service.yml
+
+            # ------------------------------------------------
+            # 7. Deploy application
+            # ------------------------------------------------
+            echo "Deploying application..."
+
+            kubectl apply -f ~/k8s/app-deployment.yml
+            kubectl apply -f ~/k8s/flask-service.yml
+
+            # ------------------------------------------------
+            # 8. Update application image
+            # ------------------------------------------------
+            echo "Updating application image..."
+
             kubectl set image deployment/ai-incident-deployment \
               ai-incident-manager=aditya0910/ai-powered-incident-manager-app:${{ github.sha }} \
               -n ai-incident-namespace
 
-            # Wait for rollout
+            # ------------------------------------------------
+            # 9. Wait for application rollout
+            # ------------------------------------------------
+            echo "Waiting for application rollout..."
+
             kubectl rollout status deployment/ai-incident-deployment \
+              -n ai-incident-namespace \
+              --timeout=180s
+
+            # ------------------------------------------------
+            # 10. Show final status
+            # ------------------------------------------------
+            echo ""
+            echo "========== Pods =========="
+
+            kubectl get pods \
               -n ai-incident-namespace
 
             echo ""
-            echo "Pods:"
-            kubectl get pods -n ai-incident-namespace
+            echo "========== Services =========="
+
+            kubectl get svc \
+              -n ai-incident-namespace
 
             echo ""
-            echo "Services:"
-            kubectl get svc -n ai-incident-namespace
-
-            echo ""
-            echo "Deployment Successful!"
+            echo "========== Deployment Successful =========="
