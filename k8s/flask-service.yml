@@ -10,7 +10,8 @@ spec:
     app: ai-incident-manager
 
   ports:
-  - port: 80
-    targetPort: 5001
+    - port: 80
+      targetPort: 5001
+      nodePort: 31697
 
   type: NodePort
